@@ -1,22 +1,41 @@
+const express = require('express');
 const mongoose = require('mongoose');
+require('dotenv').config();
+const app = express();
 
-// Define the MongoDB connection URL
-const mongoURL = "mongodb+srv://bharatkhatwani796:7pMYqtd2bLExONOT@cluster0.eto8x.mongodb.net/";
-
-// Connect to MongoDB
+// MongoDB connection setup
+const mongoURL = process.env.MONGO_URI;
 mongoose.connect(mongoURL)
-    .then(() => {
-        console.log("Connected to MongoDB server");
-    })
-    .catch((err) => {
-        console.error("MongoDB connection failed:", err);
-    });
+  .then(() => {
+    console.log("Connected to MongoDB server");
+  })
+  .catch((err) => {
+    console.error("MongoDB connection failed:", err);
+  });
 
-const db = mongoose.connection;
+// Person model
+const Person = require('./models/Person');
 
-// Disconnection event
-db.on('disconnected', () => {
-    console.log("MongoDB disconnected");
+// Dynamic route to get persons based on workType
+app.get('/person/:workType', async (req, res) => {
+  try {
+    const workType = req.params.workType;
+    console.log("WorkType from URL:", workType);
+
+    if (workType === 'chef' || workType === 'waiter' || workType === 'manager') {
+      const response = await Person.find({ work: workType });
+      console.log(response);
+      res.status(200).json(response);
+    } else {
+      res.status(404).json({ error: 'Invalid Work Type' });
+    }
+  } catch (error) {
+    console.error("Internal Server Error:", error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
-module.exports = db;
+// Start server
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});

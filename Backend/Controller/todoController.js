@@ -53,7 +53,7 @@ const updateTodo = async (req,res) =>{
     if(description) Todo.description = description;
     if(complete !== undefined) Todo.complete = complete;
     await TodoFind.save();
-    res.status(200).json({ message: "Todo updated successfully", To });
+    res.status(200).json({ message: "Todo updated successfully", updateTodo});
    
     } catch (error) {
         console.log(error);

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema(
     {
@@ -23,7 +23,7 @@ const UserSchema = new mongoose.Schema(
 );
 
 // Hash password before saving
-UserSchemaa.pre('save', async function(next) {
+UserSchema.pre('save', async function(next) {
        const person  = this;
        if (person.isModified('password')) {
         return next();

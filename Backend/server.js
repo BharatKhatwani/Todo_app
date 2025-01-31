@@ -1,25 +1,28 @@
+const dotenv = require('dotenv');
+dotenv.config();  // Move this to the top of the file
+
 const express = require('express');
 const app = express();
 const db = require('./config/db');
-const body_parser = require('body-parser');
-const dotenv = require('dotenv');
-app.use(express.json())
 
-// app.use(body_parser.json());
+// Load environment variables from the .env file
+dotenv.config();
 
-
-// const authRouter = require('./router/auth.js')
-// app.use('/auth',  authRouter);
-
-// const todoRouter = require('./router/todo.js')
-// app.use('/todo' , todoRouter);
-
-// const front = require("./Controller/authController.js")
+// Importing routes
 
 
-const PORT = process.env.PORT || 3000; // Default to 3000 if PORT is not defined
 
+app.use(express.json());  // This handles JSON body parsing
 
+// Set up routes
+const todoRouter = require('./router/todo.js');
+app.use('/todo', todoRouter);
+
+// const db = require('./config/db');
+// db.connect();  // Assuming db.js has a method to connect to your DB
+
+// Set up the port and start the server
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

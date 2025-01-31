@@ -21,7 +21,7 @@ const createUser = async (req, res) => {
             email,
             password
         });
-        
+        console.log(newUser)
         // Save the user
         await newUser.save();
 
@@ -33,19 +33,31 @@ const createUser = async (req, res) => {
     }
 }
 
-// Get All Users
 const getUser = async (req, res) => {
     try {
-        const users = await User.find();
-        if (!users || users.length === 0) {
-            return res.status(404).json({ message: "No users found" });
-        }
+        const users = await User.find();  // Fetch all users
         res.status(200).json(users);
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Internal server error", error });
     }
-}
+};
+
+
+// Get by ID
+const getUserById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error", error });
+    }
+};
+
 
 // Update User
 const updateUser = async (req, res) => {
@@ -54,18 +66,19 @@ const updateUser = async (req, res) => {
         const { username, email, password } = req.body;
         
         // Find user by ID
-        const userFind = await User.findById(id);
-        if (!userFind) {
+        const UserUpdate = await User.findById(id);
+        if (!UserUpdate) {
             return res.status(404).json({ message: "User not found" });
         }
 
         // Update user details
-        userFind.username = username || userFind.username;
-        userFind.email = email || userFind.email;
-        userFind.password = password || userFind.password;
+        UserUpdate.username = username || UserUpdate.username;
+        UserUpdate.email = email || UserUpdate.email;
+        UserUpdate.password = password || UserUpdate.password;
 
         // Save updated user
-        await userFind.save();
+        console.log(UserUpdate)
+        await UserUpdate.save();
 
         res.status(200).json({ message: "User updated successfully" });
 
@@ -87,7 +100,7 @@ const deleteUser = async (req, res) => {
         }
 
         // Remove the user
-        await userFind.remove();
+        await User.deleteOne({_id :id})
 
         res.status(200).json({ message: "User deleted successfully" });
 
@@ -97,4 +110,4 @@ const deleteUser = async (req, res) => {
     }
 }
 
-module.exports = { createUser, getUser, updateUser, deleteUser };
+module.exports = { createUser, getUser, updateUser, deleteUser, getUserById };

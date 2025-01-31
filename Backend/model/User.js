@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+// Define the User Schema
 const UserSchema = new mongoose.Schema(
     {
         username: {
@@ -19,33 +20,31 @@ const UserSchema = new mongoose.Schema(
             required: true,
         },
     },
-    { timestamps: true } // Adds createdAt and updatedAt fields
+    { timestamps: true }
 );
 
-// Hash password before saving
-UserSchema.pre('save', async function(next) {
-       const person  = this;
-       if (person.isModified('password')) {
+// Hash the password before saving the user
+UserSchema.pre('save', async function (next) {
+    const person = this;
+
+    // ✅ FIX: Hash password ONLY if it's modified or newly created
+    if (!person.isModified('password')) {
         return next();
-       }
-       try{
+    }
+
+    try {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(person.password, salt);
-        User.password = hashedPassword;
+        person.password = hashedPassword;  // ✅ Store hashed password correctly
         next();
-       }
-       catch(error){
-        return next(error);
-       }
-})
-// Compare passwords
-UserSchema.methods.comparePassword = async function (candidatePassword) {
-    try {
-        const isMatch = await bcrypt.compare(candidatePassword, this.password);
-        return isMatch;
     } catch (error) {
-        throw error;
+        return next(error);
     }
+});
+
+// Compare entered password with stored hashed password
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
 };
 
 const User = mongoose.model('User', UserSchema);

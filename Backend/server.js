@@ -1,25 +1,22 @@
 const dotenv = require('dotenv');
-dotenv.config();  // Move this to the top of the file
+dotenv.config();  // This should be at the top to load env variables before any other require
 
 const express = require('express');
 const app = express();
 const db = require('./config/db');
 
-// Load environment variables from the .env file
-dotenv.config();
-
 // Importing routes
+const UserRoute = require('./router/user.js');
+const todoRouter = require('./router/todo.js');
 
+// Middleware to handle JSON body parsing
+app.use(express.json());
 
-
-app.use(express.json());  // This handles JSON body parsing
+const Middleware = require('./middleware/auth.js');
 
 // Set up routes
-const todoRouter = require('./router/todo.js');
-app.use('/todo', todoRouter);
-
-// const db = require('./config/db');
-// db.connect();  // Assuming db.js has a method to connect to your DB
+app.use('/user', UserRoute); // No need for Middleware here (user registration & login should be public)
+app.use('/todos', Middleware, todoRouter); // Apply Middleware only for protected routes
 
 // Set up the port and start the server
 const PORT = process.env.PORT || 3000;

@@ -1,10 +1,13 @@
-const Todo = require('../model/Todo.js');
-
 // ✅ Create a To-Do
+const Todo = require('../model/Todo.js')
+const mongoose = require('mongoose');
+
+
 const createTodo = async (req, res) => {
     try {
-        const { title, description } = req.body;
+        console.log("Decoded User:", req.user);  // Debugging line
 
+        const { userId, title, description } = req.body; 
         if (!req.user) {
             return res.status(400).json({ message: "User not found" });
         }
@@ -14,9 +17,9 @@ const createTodo = async (req, res) => {
         }
 
         const newTodo = new Todo({
+            User: new mongoose.Types.ObjectId(userId),  // Ensure this is correct (req.user.userId)
             title,
             description,
-            user: req.user._id  // ✅ Correct user reference
         });
 
         await newTodo.save();
@@ -35,7 +38,7 @@ const getTodos = async (req, res) => {
             return res.status(400).json({ message: "User not found" });
         }
 
-        const todos = await Todo.find({ user: req.user._id });
+        const todos = await Todo.find({ user: req.user.userId });  // Changed 'User' to 'user'
         res.status(200).json(todos);
 
     } catch (error) {
@@ -55,7 +58,12 @@ const updateTodo = async (req, res) => {
             return res.status(404).json({ message: "Todo not found" });
         }
 
-        // ✅ Update fields only if provided
+        // Check if the user owns the todo
+        if (todoFind.user.toString() !== req.user.userId.toString()) {  // Changed 'User' to 'user'
+            return res.status(403).json({ message: "Unauthorized action" });
+        }
+
+        // Update fields only if provided
         if (title) todoFind.title = title;
         if (description) todoFind.description = description;
         if (complete !== undefined) todoFind.complete = complete;
@@ -79,7 +87,12 @@ const deleteTodo = async (req, res) => {
             return res.status(404).json({ message: "Todo not found" });
         }
 
-        await Todo.deleteOne({ _id: id });  // ✅ Correct deletion method
+        // Check if the user owns the todo
+        if (todoFind.user.toString() !== req.user.userId.toString()) {  // Changed 'User' to 'user'
+            return res.status(403).json({ message: "Unauthorized action" });
+        }
+
+        await Todo.deleteOne({ _id: id });
         res.status(200).json({ message: "Todo deleted successfully" });
 
     } catch (error) {

@@ -24,28 +24,28 @@ const UserSchema = new mongoose.Schema(
 );
 
 // Hash the password before saving the user
-UserSchema.pre('save', async function (next) {
-    const person = this;
+// UserSchema.pre('save', async function (next) {
+//     const person = this;
 
-    // ✅ FIX: Hash password ONLY if it's modified or newly created
-    if (!person.isModified('password')) {
-        return next();
-    }
+//     // ✅ FIX: Hash password ONLY if it's modified or newly created
+//     if (!person.isModified('password')) {
+//         return next();
+//     }
 
-    try {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(person.password, salt);
-        person.password = hashedPassword;  // ✅ Store hashed password correctly
-        next();
-    } catch (error) {
-        return next(error);
-    }
-});
+//     try {
+//         const salt = await bcrypt.genSalt(10);
+//         const hashedPassword = await bcrypt.hash(person.password, salt);
+//         person.password = hashedPassword;  // ✅ Store hashed password correctly
+//         next();
+//     } catch (error) {
+//         return next(error);
+//     }
+// });
 
-// Compare entered password with stored hashed password
-UserSchema.methods.comparePassword = async function (candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.password);
-};
+// // Compare entered password with stored hashed password
+// UserSchema.methods.comparePassword = async function (candidatePassword) {
+//     return await bcrypt.compare(candidatePassword, this.password);
+// };
 
 const User = mongoose.model('User', UserSchema);
 module.exports = User;
